@@ -88,6 +88,38 @@
       }
     });
   </script>
+<!-- ================================================================= -->
+<!-- TEMPORARY DEVELOPMENT / TESTING SCRIPT                            -->
+<!-- PLEASE REMOVE OR COMMENT OUT THIS SECTION BEFORE PRODUCTION!      -->
+<!-- ================================================================= -->
 
+<script>
+(function() {
+  // פונקציית הטריגר הראשית שמפעילה את האקשן באתר
+  function triggerAction() {
+    console.log("Trigger activated!");
+    
+    // כאן שמים את הקוד/פונקציה שמפעילה את האנימציה או הווידאו שלך
+    // לדוגמה: startAnimation() או playVideo()
+  }
+
+  // 1. האזנה למקש Space (עבור הארדואינו / מקלדת)
+  document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space' || event.keyCode === 32) {
+      event.preventDefault();
+      triggerAction();
+    }
+  });
+
+  // 2. האזנה למגע בכל שטח המסך (לצורך בדיקות בטאבלט)
+  document.addEventListener('touchstart', function(event) {
+    triggerAction();
+  }, { passive: true });
+})();
+</script>
+
+<!-- ================================================================= -->
+<!-- END OF TEMPORARY TESTING SCRIPT                                   -->
+<!-- ================================================================= -->
 </body>
 </html>
