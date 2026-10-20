@@ -32,124 +32,96 @@
   <script>
     const video = document.getElementById('hologramVideo');
     let isPlaying = false;
-    let waitForRelease = false; // משתנה נעילה שמונע הפעלה חוזרת כל עוד לא עזבת את המקש
-
     video.loop = false;
-    const TRIGGER_KEY = ' '; 
+    const TRIGGER_KEY = ' ';
 
-    // לחיצת מקש במקלדת
-    window.addEventListener('keydown', (event) => {
-      if (event.repeat) return; // מתעלם מחזרות אוטומטיות של המערכת
-
-      if (event.key === TRIGGER_KEY || event.code === 'Space') {
-        // אם הסרטון נגמר והאצבע עדיין על המקש, אל תעשה כלום
-        if (waitForRelease) return;
-
-        if (!isPlaying) {
-          isPlaying = true;
-          video.currentTime = 0;
-          video.style.display = 'block';
-          video.play().catch(err => {
-            console.error("שגיאה בניגון:", err);
-            isPlaying = false;
-          });
-        }
-      }
-    });
-
-    // שחרור מקש במקלדת
-    window.addEventListener('keyup', (event) => {
-      if (event.key === TRIGGER_KEY || event.code === 'Space') {
+    // פונקציה להפעלת הסרטון (בלחיצה / לחיצת Space)
+    function startVideo() {
+      if (isPlaying) return;
+      isPlaying = true;
+      video.currentTime = 0;
+      video.style.display = 'block';
+      video.play().then(() => {
+        updateDebug('מנגן (לחוץ)...', '#ff0055');
+      }).catch(err => {
+        console.error("שגיאה בניגון:", err);
         isPlaying = false;
-        waitForRelease = false; // משחררים את הנעילה כשהאצבע יורדת מהמקש
-        video.pause();
-        video.currentTime = 0;
-        video.style.display = 'none';
-      }
-    });
+      });
+    }
 
-    // כשהסרטון מסתיים מעצמו
-    video.addEventListener('ended', () => {
+    // פונקציה לעצירת הסרטון (כשעוזבים מקש / מרימים אצבע)
+    function stopVideo() {
       isPlaying = false;
-      waitForRelease = true; // נועל את האפשרות להמשיך לנגן עד שהמשתמש ירים את האצבע
       video.pause();
       video.currentTime = 0;
       video.style.display = 'none';
-    });
+      updateDebug('ממתין ללחיצה...', '#00ff66');
+    }
 
-    // שכבת הגנה נוספת לסיום
-    video.addEventListener('timeupdate', () => {
-      if (video.duration && video.currentTime >= video.duration - 0.05) {
-        isPlaying = false;
-        waitForRelease = true;
-        video.pause();
-        video.currentTime = 0;
-        video.style.display = 'none';
+    // --- 1. מקלדת / ארדואינו (Space) ---
+    window.addEventListener('keydown', (event) => {
+      if (event.repeat) return;
+      if (event.key === TRIGGER_KEY || event.code === 'Space') {
+        event.preventDefault();
+        startVideo();
       }
     });
-  </script>
-<!-- ================================================================= -->
-<!-- TEMPORARY DEVELOPMENT / TESTING SCRIPT                            -->
-<!-- PLEASE REMOVE OR COMMENT OUT THIS SECTION BEFORE PRODUCTION!      -->
-<!-- ================================================================= -->
 
-<!-- תיבת חיווי זמנית כדי לראות שהלחיצה עובדת -->
-<div id="debug-box" style="
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: #00ff66;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-family: monospace;
-  border-radius: 5px;
-  z-index: 99999;
-  pointer-events: none;
-">ממתין ללחיצה...</div>
+    window.addEventListener('keyup', (event) => {
+      if (event.key === TRIGGER_KEY || event.code === 'Space') {
+        stopVideo();
+      }
+    });
 
-<script>
-(function() {
-  function triggerAction() {
-    console.log("Trigger activated!");
-    
-    // עדכון התיקייה על המסך שנראה שזה עבד
-    const debugBox = document.getElementById('debug-box');
-    if (debugBox) {
-      debugBox.style.color = '#ff0055';
-      debugBox.innerText = 'הלחיצה נקלטה בהצלחה! 🚀';
-      setTimeout(() => {
-        debugBox.style.color = '#00ff66';
-        debugBox.innerText = 'ממתין ללחיצה...';
-      }, 1500);
-    }
-    
-    // כאן תשימי בהמשך את הפונקציה האמיתית שלך (למשל: playVideo())
-  }
-
-  // 1. האזנה למקש Space
-  document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space' || event.keyCode === 32) {
+    // --- 2. מגע במסך (לטאבלט - לחיצה ממושכת או נגיעה) ---
+    document.addEventListener('touchstart', (event) => {
       event.preventDefault();
-      triggerAction();
+      startVideo();
+    }, { passive: false });
+
+    document.addEventListener('touchend', (event) => {
+      stopVideo();
+    });
+
+    // --- 3. תמיכה בעכבר למחשב (לצורך בדיקות) ---
+    document.addEventListener('mousedown', () => {
+      startVideo();
+    });
+
+    document.addEventListener('mouseup', () => {
+      stopVideo();
+    });
+
+    // --- סיום סרטון טבעי ---
+    video.addEventListener('ended', () => {
+      stopVideo();
+    });
+
+    // פונקציית עזר לדיבאג
+    function updateDebug(text, color) {
+      const debugBox = document.getElementById('debug-box');
+      if (debugBox) {
+        debugBox.style.color = color;
+        debugBox.innerText = text;
+      }
     }
-  });
+  </script>
 
-  // 2. האזנה למגע בכל המסך
-  document.addEventListener('touchstart', function(event) {
-    triggerAction();
-  }, { passive: true });
+  <!-- תיבת חיווי זמנית לבדיקה - להסיר לפני פרודקשן -->
+  <div id="debug-box" style="
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff66;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: monospace;
+    border-radius: 5.5px;
+    z-index: 99999;
+    pointer-events: none;
+  ">ממתין ללחיצה...</div>
 
-  // 3. תמיכה גם בלחיצת עכבר רגילה (למקרה ובודקים במחשב)
-  document.addEventListener('click', function(event) {
-    triggerAction();
-  });
-})();
-</script>
-
-<!-- ================================================================= -->
-<!-- END OF TEMPORARY TESTING SCRIPT                                   -->
-<!-- ================================================================= -->
 </body>
 </html>
