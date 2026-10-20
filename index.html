@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepper's Ghost Hologram</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <video id="hologramVideo" src="hologram.mp4" playsinline preload="auto"></video>
+
+  <script>
+    const video = document.getElementById('hologramVideo');
+    let isPlaying = false;
+    let waitForRelease = false; // משתנה נעילה שמונע הפעלה חוזרת כל עוד לא עזבת את המקש
+
+    video.loop = false;
+    const TRIGGER_KEY = ' '; 
+
+    // לחיצת מקש במקלדת
+    window.addEventListener('keydown', (event) => {
+      if (event.repeat) return; // מתעלם מחזרות אוטומטיות של המערכת
+
+      if (event.key === TRIGGER_KEY || event.code === 'Space') {
+        // אם הסרטון נגמר והאצבע עדיין על המקש, אל תעשה כלום
+        if (waitForRelease) return;
+
+        if (!isPlaying) {
+          isPlaying = true;
+          video.currentTime = 0;
+          video.style.display = 'block';
+          video.play().catch(err => {
+            console.error("שגיאה בניגון:", err);
+            isPlaying = false;
+          });
+        }
+      }
+    });
+
+    // שחרור מקש במקלדת
+    window.addEventListener('keyup', (event) => {
+      if (event.key === TRIGGER_KEY || event.code === 'Space') {
+        isPlaying = false;
+        waitForRelease = false; // משחררים את הנעילה כשהאצבע יורדת מהמקש
+        video.pause();
+        video.currentTime = 0;
+        video.style.display = 'none';
+      }
+    });
+
+    // כשהסרטון מסתיים מעצמו
+    video.addEventListener('ended', () => {
+      isPlaying = false;
+      waitForRelease = true; // נועל את האפשרות להמשיך לנגן עד שהמשתמש ירים את האצבע
+      video.pause();
+      video.currentTime = 0;
+      video.style.display = 'none';
+    });
+
+    // שכבת הגנה נוספת לסיום
+    video.addEventListener('timeupdate', () => {
+      if (video.duration && video.currentTime >= video.duration - 0.05) {
+        isPlaying = false;
+        waitForRelease = true;
+        video.pause();
+        video.currentTime = 0;
+        video.style.display = 'none';
+      }
+    });
+  </script>
+
+</body>
+</html>
