@@ -35,27 +35,22 @@
     video.loop = false;
     const TRIGGER_KEY = ' ';
 
-    // פונקציה להפעלת הסרטון (בלחיצה / לחיצת Space)
     function startVideo() {
       if (isPlaying) return;
       isPlaying = true;
       video.currentTime = 0;
       video.style.display = 'block';
-      video.play().then(() => {
-        updateDebug('מנגן (לחוץ)...', '#ff0055');
-      }).catch(err => {
+      video.play().catch(err => {
         console.error("שגיאה בניגון:", err);
         isPlaying = false;
       });
     }
 
-    // פונקציה לעצירת הסרטון (כשעוזבים מקש / מרימים אצבע)
     function stopVideo() {
       isPlaying = false;
       video.pause();
       video.currentTime = 0;
       video.style.display = 'none';
-      updateDebug('ממתין ללחיצה...', '#00ff66');
     }
 
     // --- 1. מקלדת / ארדואינו (Space) ---
@@ -73,7 +68,7 @@
       }
     });
 
-    // --- 2. מגע במסך (לטאבלט - לחיצה ממושכת או נגיעה) ---
+    // --- 2. מגע במסך (לטאבלט - לצורך בדיקות, אפשר להסיר אם תרצי רק ארדואינו) ---
     document.addEventListener('touchstart', (event) => {
       event.preventDefault();
       startVideo();
@@ -96,32 +91,7 @@
     video.addEventListener('ended', () => {
       stopVideo();
     });
-
-    // פונקציית עזר לדיבאג
-    function updateDebug(text, color) {
-      const debugBox = document.getElementById('debug-box');
-      if (debugBox) {
-        debugBox.style.color = color;
-        debugBox.innerText = text;
-      }
-    }
   </script>
-
-  <!-- תיבת חיווי זמנית לבדיקה - להסיר לפני פרודקשן -->
-  <div id="debug-box" style="
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #00ff66;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-family: monospace;
-    border-radius: 5.5px;
-    z-index: 99999;
-    pointer-events: none;
-  ">ממתין ללחיצה...</div>
 
 </body>
 </html>
