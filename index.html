@@ -26,7 +26,7 @@
   </style>
 </head>
 <body>
-
+<p>this</p>
   <video id="hologramVideo" src="hologram.mp4" playsinline preload="auto"></video>
 
   <script>
@@ -93,17 +93,42 @@
 <!-- PLEASE REMOVE OR COMMENT OUT THIS SECTION BEFORE PRODUCTION!      -->
 <!-- ================================================================= -->
 
+<!-- תיבת חיווי זמנית כדי לראות שהלחיצה עובדת -->
+<div id="debug-box" style="
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #00ff66;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-family: monospace;
+  border-radius: 5px;
+  z-index: 99999;
+  pointer-events: none;
+">ממתין ללחיצה...</div>
+
 <script>
 (function() {
-  // פונקציית הטריגר הראשית שמפעילה את האקשן באתר
   function triggerAction() {
     console.log("Trigger activated!");
     
-    // כאן שמים את הקוד/פונקציה שמפעילה את האנימציה או הווידאו שלך
-    // לדוגמה: startAnimation() או playVideo()
+    // עדכון התיקייה על המסך שנראה שזה עבד
+    const debugBox = document.getElementById('debug-box');
+    if (debugBox) {
+      debugBox.style.color = '#ff0055';
+      debugBox.innerText = 'הלחיצה נקלטה בהצלחה! 🚀';
+      setTimeout(() => {
+        debugBox.style.color = '#00ff66';
+        debugBox.innerText = 'ממתין ללחיצה...';
+      }, 1500);
+    }
+    
+    // כאן תשימי בהמשך את הפונקציה האמיתית שלך (למשל: playVideo())
   }
 
-  // 1. האזנה למקש Space (עבור הארדואינו / מקלדת)
+  // 1. האזנה למקש Space
   document.addEventListener('keydown', function(event) {
     if (event.code === 'Space' || event.keyCode === 32) {
       event.preventDefault();
@@ -111,10 +136,15 @@
     }
   });
 
-  // 2. האזנה למגע בכל שטח המסך (לצורך בדיקות בטאבלט)
+  // 2. האזנה למגע בכל המסך
   document.addEventListener('touchstart', function(event) {
     triggerAction();
   }, { passive: true });
+
+  // 3. תמיכה גם בלחיצת עכבר רגילה (למקרה ובודקים במחשב)
+  document.addEventListener('click', function(event) {
+    triggerAction();
+  });
 })();
 </script>
 
